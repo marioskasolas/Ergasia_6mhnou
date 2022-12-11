@@ -75,6 +75,6 @@ int main() {
        int gender_converter(unsigned short int hexadecimal){
            unsigned short int temp;
            temp = (hexadecimal >> 8) & 0x0f;
-           temp = temp >> 3;
+           temp = temp >> 3 & 0xf;
            printf("%x x is",temp);
        }
