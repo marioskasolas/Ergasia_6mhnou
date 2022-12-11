@@ -4,6 +4,7 @@
 int ms_bin(unsigned short int hexadecimal);
 int sms_bin(unsigned short int hexadecimal);
 int age_converter(unsigned short temp,unsigned short temp2);
+int gender_converter(unsigned short int hexadecimal);
 
 int main() {
     unsigned short temp1, temp2;
@@ -25,6 +26,8 @@ int main() {
 
     } while (age < 18 && age > 99);
     printf("age is %d\n",age);
+
+    gender_converter(hexadecimal);
 }
 
 
@@ -66,6 +69,12 @@ int main() {
                    sum = sum + pow(2,i);
                }
            }
-           printf("sum is %d\n",sum);
            return sum;
+       }
+
+       int gender_converter(unsigned short int hexadecimal){
+           unsigned short int temp;
+           temp = (hexadecimal >> 8) & 0x0f;
+           temp = temp >> 3;
+           printf("%x x is",temp);
        }
