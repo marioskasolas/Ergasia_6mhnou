@@ -9,7 +9,7 @@ int vote_converter(unsigned short int hexadecimal);
 
 int main() {
     unsigned short temp1, temp2;
-    int age,gender;
+    int age,gender,vote;
     unsigned short int hexadecimal;
 
     do {
@@ -25,8 +25,9 @@ int main() {
 
         age = age_converter(temp2, temp1);
         gender = gender_converter(hexadecimal);
+        vote = vote_converter(hexadecimal);
 
-    } while ((age < 18 && age > 99) && (gender < 1 && gender >3));
+    } while ((age < 18 || age > 99) && (gender < 1 || gender > 3) && (vote < 0 || vote > 6 ));
     printf("age is %d\n",age);
     vote_converter(hexadecimal);
     printf("their gender is %d",gender);
@@ -93,13 +94,13 @@ int main() {
        }
 
        int vote_converter(unsigned short int hexadecimal){
-           unsigned short int temp;
-           temp = hexadecimal & 0x000f;
+           unsigned short int temp1,temp2;
+           temp1 = hexadecimal & 0x000f;
            int consec = 0;
            int r,index;
            for(int i = 0; i <= 3; i++){
-               r = temp % 2;
-               temp = temp /2;
+               r = temp1 % 2;
+               temp1 = temp1 /2;
                if(r == 1){
                    consec = consec + 1;
                    index = i;
@@ -109,10 +110,21 @@ int main() {
                }
 
            }
-           printf("%d index\n",index);
-
-
+           printf("%d consec\n",consec);
+           temp2 = hexadecimal >> 4 & 0x00f;
+           temp2 = temp2 & 0x0111;
            for(int i = 4; i <= 6; i++){
-
+               r = temp2 % 2;
+               temp2 = temp2 / 2;
+               if(r == 1){
+                   consec = consec + 1;
+                   index = i;
+                   printf("consec %d",consec);
+                   if(consec > 1){
+                       return -1;
+                   }
+               }
            }
+           printf("%d index is at\n",index);
+           return index;
        }
