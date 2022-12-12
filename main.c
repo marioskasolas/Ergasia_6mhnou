@@ -5,10 +5,11 @@ int ms_bin(unsigned short int hexadecimal);
 int sms_bin(unsigned short int hexadecimal);
 int age_converter(unsigned short temp,unsigned short temp2);
 int gender_converter(unsigned short int hexadecimal);
+int vote_converter(unsigned short int hexadecimal);
 
 int main() {
     unsigned short temp1, temp2;
-    int age;
+    int age,gender;
     unsigned short int hexadecimal;
 
     do {
@@ -21,13 +22,14 @@ int main() {
         printf("%d ptr1\n", temp1);
         temp2 = sms_bin(hexadecimal);
         printf("%d ptr2\n", temp2);
-        age_converter(temp2, temp1);
+
         age = age_converter(temp2, temp1);
+        gender = gender_converter(hexadecimal);
 
-    } while (age < 18 && age > 99);
+    } while ((age < 18 && age > 99) && (gender < 1 && gender >3));
     printf("age is %d\n",age);
-
-    gender_converter(hexadecimal);
+    vote_converter(hexadecimal);
+    printf("their gender is %d",gender);
 }
 
 
@@ -73,8 +75,44 @@ int main() {
        }
 
        int gender_converter(unsigned short int hexadecimal){
+           /* κάνει isolate το τελευταίο bit του δεύτερου 16δικού*/
+           unsigned short int temp1,temp2;
+           temp1 = (hexadecimal >> 8) & 0x0f;
+           temp1 = temp1 & 0x0001;
+           if(temp1 == 1){
+               temp1 = 2;
+           }
+
+           temp2 = (hexadecimal >> 4) & 0x00f;
+           temp2 = temp2 >> 3;
+           if(temp2 == 1){
+               temp2 = 1;
+           }
+
+           return temp1 + temp2;
+       }
+
+       int vote_converter(unsigned short int hexadecimal){
            unsigned short int temp;
-           temp = (hexadecimal >> 8) & 0x0f;
-           temp = temp >> 3 & 0xf;
-           printf("%x x is",temp);
+           temp = hexadecimal & 0x000f;
+           int consec = 0;
+           int r,index;
+           for(int i = 0; i <= 3; i++){
+               r = temp % 2;
+               temp = temp /2;
+               if(r == 1){
+                   consec = consec + 1;
+                   index = i;
+                   if(consec > 1){
+                       return -1;
+                   }
+               }
+
+           }
+           printf("%d index\n",index);
+
+
+           for(int i = 4; i <= 6; i++){
+
+           }
        }
