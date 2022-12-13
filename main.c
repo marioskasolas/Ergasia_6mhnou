@@ -27,9 +27,9 @@ int main() {
         gender = gender_converter(hexadecimal);
         vote = vote_converter(hexadecimal);
 
-    } while ((age < 18 || age > 99) && (gender < 1 || gender > 3) && (vote < 0 || vote > 6 ));
+
+    } while ( (age < 18 || age > 99 ) || (gender < 1 || gender > 3) || (vote < 1 || vote > 6));
     printf("age is %d\n",age);
-    vote_converter(hexadecimal);
     printf("their gender is %d",gender);
 }
 
@@ -37,7 +37,6 @@ int main() {
 
         /* συνάρτηση που χωρίζει τα πρώτα 4 most significant bits */
         int ms_bin(unsigned short int hexadecimal){
-       int i;
        unsigned short int ptr1;
        ptr1 = (hexadecimal >> 12);
        return  ptr1;
@@ -105,26 +104,29 @@ int main() {
                    consec = consec + 1;
                    index = i;
                    if(consec > 1){
-                       return -1;
+                       index = -1;
+                       break;
                    }
                }
 
            }
-           printf("%d consec\n",consec);
-           temp2 = hexadecimal >> 4 & 0x00f;
-           temp2 = temp2 & 0x0111;
-           for(int i = 4; i <= 6; i++){
-               r = temp2 % 2;
-               temp2 = temp2 / 2;
-               if(r == 1){
-                   consec = consec + 1;
-                   index = i;
-                   printf("consec %d",consec);
-                   if(consec > 1){
-                       return -1;
-                   }
-               }
-           }
+         if(index != -1) {
+             temp2 = hexadecimal >> 4 & 0x00f;
+             temp2 = temp2 & 0x0111;
+             for (int i = 4; i <= 6; i++) {
+                 r = temp2 % 2;
+                 temp2 = temp2 / 2;
+                 if (r == 1) {
+                     consec = consec + 1;
+                     index = i;
+                     printf("consec %d\n", consec);
+                     if (consec > 1) {
+                         index = -1;
+                         break;
+                     }
+                 }
+             }
+         }
            printf("%d index is at\n",index);
            return index;
        }
