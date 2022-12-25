@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-int ms_bin(unsigned short int hexadecimal);
-int sms_bin(unsigned short int hexadecimal);
-int age_converter(unsigned short temp,unsigned short temp2);
+int age_converter(unsigned short int);
 int gender_converter(unsigned short int hexadecimal);
 int vote_converter(unsigned short int hexadecimal);
 
@@ -12,18 +10,10 @@ int main() {
     int age, gender, vote, number_of_voters;
     unsigned short int hexadecimal;
     do {
-        printf("enter hexadecimal\n");
 
         scanf("%x", &hexadecimal);
-
-        /* χρήση συναρτήσεων για απομώνωση των πρώτων 7 bit */
-        temp1 = ms_bin(hexadecimal);
-        printf("%d ptr1\n", temp1);
-        temp2 = sms_bin(hexadecimal);
-        printf("%d ptr2\n", temp2);
-
         /* χρήση συναρτήσεων για μετατροπή ηλικίας , φύλλου και ψήφου (οι απομωνώσεις των υπόλοιπων μπιτ γίνονται μέσα σε καθεμία απο αυτές αντίστοιχα)*/
-        age = age_converter(temp2, temp1);
+        age = age_converter(hexadecimal);
         gender = gender_converter(hexadecimal);
         vote = vote_converter(hexadecimal);
 
@@ -34,39 +24,30 @@ int main() {
 
 }
 
-    /* συνάρτηση που χωρίζει τα πρώτα 4 most significant bits */
-    int ms_bin(unsigned short int hexadecimal) {
-        unsigned short int ptr1;
-        ptr1 = (hexadecimal >> 12);
-        return ptr1;
-
-    }
-
-    // συνάρτηση που χωρίζει τα επόμενα 3 των πρώτων 4 bit
-    int sms_bin(unsigned short int hexadecimal) {
-        unsigned short int ptr2;
-
-        ptr2 = (hexadecimal >> 8) & 0x0f;
-        ptr2 = (ptr2 >> 1);
-        return ptr2;
-    }
-
     // συνάρτηση που μετατρέπει τον δεκαξαδικό σε ηλικία μορφής ακεραίου
-    int age_converter(unsigned short f3b, unsigned short temp2) {
-        //η f3b μεταφέρει τα 3 επομενα των πρώτων 4 bit ενώ η temp2 τα πρώτα 4
+    int age_converter(unsigned short int hexadecimal){
+        unsigned short int prwta_4,deftera_3;
+
+        prwta_4 = (hexadecimal >> 12);
+        deftera_3 = (hexadecimal >> 8) & 0x0f;
+        deftera_3 = (deftera_3 >> 1);
+
+
+        //η deftera_3 μεταφέρει τα 3 επομενα των πρώτων 4 bit ενώ η  prwta_4 τα πρώτα 4
+
         int r;//remainder του χ/2
         int sum = 0;//αποθηκεύει την ηλικία
         for (int i = 0; i <= 2; i++) {
-            r = f3b % 2;
-            f3b = f3b / 2;
+            r = deftera_3 % 2;
+            deftera_3 = deftera_3 / 2;
             if (r == 1) {
                 sum = sum + pow(2, i);
             }
         }
 
         for (int i = 3; i <= 6; i++) {
-            r = temp2 % 2;
-            temp2 = temp2 / 2;
+            r = prwta_4 % 2;
+            prwta_4 = prwta_4 / 2;
             if (r == 1) {
                 sum = sum + pow(2, i);
             }
