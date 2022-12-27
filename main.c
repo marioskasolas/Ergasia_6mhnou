@@ -4,24 +4,34 @@
 int age_converter(unsigned short int);
 int gender_converter(unsigned short int hexadecimal);
 int vote_converter(unsigned short int hexadecimal);
+int number_of_voters(void);
 
 int main() {
-    unsigned short temp1, temp2;
-    int age, gender, vote, number_of_voters;
+    int age, gender, vote, voters,c1,i = 1;
     unsigned short int hexadecimal;
-    do {
+    char c[5];
+    c[5] = '\0';
+    voters = number_of_voters();//συνάρτηση που ανοιγέι ψηφοφτο αρχείο και μετράει το πλήθος των ψηφοφρών
 
-        scanf("%x", &hexadecimal);
-        /* χρήση συναρτήσεων για μετατροπή ηλικίας , φύλλου και ψήφου (οι απομωνώσεις των υπόλοιπων μπιτ γίνονται μέσα σε καθεμία απο αυτές αντίστοιχα)*/
-        age = age_converter(hexadecimal);
-        gender = gender_converter(hexadecimal);
-        vote = vote_converter(hexadecimal);
+    FILE * fp;
+    fp = fopen("C:/Users/mario/OneDrive/Desktop/writeup.dat","r");
+    while ((c1 = fgetc(fp)) != EOF){
+        c[i] = c1;
+        i++;
+    }
+
+    do{
+
+            scanf("%x", &hexadecimal);
+
+            age = age_converter(hexadecimal);//χρήση συνάρτησης για μετατροπή ηλικίας τών 7 most significant  bit του δεκαεξαδικού
+            gender = gender_converter(hexadecimal);//χρήση συνάρτησης για μετατροπή του γένους απο το 8ό και το 9ό μπιτ
+            vote = vote_converter(hexadecimal);//χρήση συν
 
 
-    } while ((age < 18 || age > 99) || (gender < 1 || gender > 3) || (vote < 1 || vote > 6)); //συνθήκη τερματισμού ελέγχου εγκυρότητας
-    printf("Given age is %d\n", age);
-    printf("Given gender is %d", gender);
-
+        } while ((age < 18 || age > 99) || (gender < 1 || gender > 3) || (vote < 1 || vote > 6)); //συνθήκη τερματισμού ελέγχου εγκυρότητας
+        printf("Given age is %d\n", age);
+        printf("Given gender is %d", gender);
 }
 
     // συνάρτηση που μετατρέπει τον δεκαξαδικό σε ηλικία μορφής ακεραίου
@@ -112,3 +122,20 @@ int main() {
         printf("%d index is at\n", index);
         return index;
     }
+
+    int number_of_voters(void){
+        int counter = 0,c;
+    FILE * fp;
+        fp = fopen("C:/Users/mario/OneDrive/Desktop/writeup.dat","r");
+        if(fp == NULL){
+            printf("not enough memory");
+            return 1;
+        }
+        while ((c = fgetc(fp)) != EOF) {
+            if(c == '\n'){
+                counter++;
+            }
+        }
+        fclose(fp);
+        return counter;
+}
