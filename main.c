@@ -8,8 +8,8 @@ int vote_converter(char,char);
 unsigned short int hex_conv(char c);
 
 int main() {
-    int age,gender,vote,valid_votes,i,**p,j;
-    char c[5],c1;
+    int age,gender,vote,i,**p,j = 1;
+    char c[5];
     c[5] = '\0';
 
     //ανοίγμα αρχείου ψηφοφόρων
@@ -33,16 +33,23 @@ int main() {
 
         if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && (vote >= 1 && vote <= 6)){
             printf("This voters vote is valid!\n");
-            valid_votes++;
 
+            //συμπλήρωση δυναμικού πίνακα
+            if(j == 1){
+                p = calloc(j, sizeof(int*));
+                p[j] = calloc(3,sizeof(int));
+            }
+            else if(j != 1 ){
+                p = realloc(p,j*sizeof(int));
+                p[j] = calloc(3,sizeof(int));
+            }
+
+
+
+            j++;
         }
-    }while(c1 = fgetc(fp) != EOF);
+    }while(fgetc(fp) != EOF);
 
-    //δήλωση πίνακα πληροφορίων ψηφοφόρων
-    p = calloc(3,sizeof(int*));
-    for(j = 0; j < 3; j++){
-        p[j] = calloc(valid_votes, sizeof(int));
-    }
 }
 
 
