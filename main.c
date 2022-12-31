@@ -2,13 +2,18 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define NUM_CANDIDATES 6
+
 int age_converter(char,char);
 int gender_converter(char,char);
 int vote_converter(char,char);
 unsigned short int hex_conv(char c);
+void candidates_table(unsigned int cand[6][3] ,int **,int);
+void bubblesort(int**,int);
 
 int main() {
-    int age,gender,vote,i,**p,j = 1;
+    unsigned int cand[NUM_CANDIDATES][3];
+    int age,gender,vote,i,**p,n = 1;
     char c[5];
     c[5] = '\0';
 
@@ -31,26 +36,44 @@ int main() {
         vote = vote_converter(c[3], c[4]);
         printf("%d vote,%d age,%d gender\n",vote,age,gender);
 
-        if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && (vote >= 1 && vote <= 6)){
+        if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && (vote >= 0 && vote <= 6)){
             printf("This voters vote is valid!\n");
+            printf("\n");
 
             //συμπλήρωση δυναμικού πίνακα
-            if(j == 1){
-                p = calloc(j, sizeof(int*));
-                p[j] = calloc(3,sizeof(int));
+            if(n == 1){
+                p = calloc(n, sizeof(int*));
+                p[n] = calloc(3,sizeof(int));
             }
-            else if(j != 1 ){
-                p = realloc(p,j*sizeof(int));
-                p[j] = calloc(3,sizeof(int));
+            else if(n != 1 ){
+                p = realloc(p,n*sizeof(int));
+                p[n] = calloc(3,sizeof(int));
             }
 
+            p[n][1] = age;
+            p[n][2] = gender;
+            p[n][3] = vote;
 
 
-            j++;
+            n++;
         }
     }while(fgetc(fp) != EOF);
 
-}
+    n--;
+
+    bubblesort(p,n);
+    candidates_table(cand,p,n);
+
+/*
+    for(i = 1; i <= n; i++){
+        for(int j = 1; j <= 3; j++){
+            printf("p[%d][%d] = %d\n",i,j,p[i][j]);
+        }
+    }
+*/
+ }
+
+
 
 
 // συνάρτηση που υπολογιζεί μεσώ των πρώτων 2 ψηφιών του δεκαεξαδικου αριθμού την ηλικία του ψηφοφόρου
@@ -67,19 +90,26 @@ int main() {
         int sum = 0;//αποθηκεύει την ηλικία
         for (int i = 0; i <= 2; i++) {
             r = second2_hex % 2;
-            second2_hex = second_hex / 2;
-            if (r == 1) {
+            //printf("r1 is %d ",r);
+            second2_hex = second2_hex / 2;
+            //printf("hex1 is %d",second2_hex);
+            if(r == 1) {
                 sum = sum + pow(2, i);
+                //printf("sum1 is %d\n",sum);
             }
         }
 
         for (int i = 3; i <= 6; i++) {
             r = first1_hex % 2;
+            //printf("r2 is %d ",r);
             first1_hex = first1_hex / 2;
+            //printf("hex2 is %d ",second2_hex);
             if (r == 1) {
                 sum = sum + pow(2, i);
+                //printf("sum2 is %d\n",sum);
             }
         }
+
         return sum;
     }
 
@@ -201,4 +231,44 @@ unsigned short int hex_conv(char c) {
     }
 
     return hex;
+}
+
+void bubblesort(int** p,int n){
+    int i,j,temp1,temp2,temp3;
+    for(i = 2;i <= n; i++){
+        for(j = n; j >= i; j--){
+            if(p[j-1][3] > p[j][3]){
+                temp3 = p[j-1][3];
+                p[j-1][3] = p[j][3];
+                p[j][3] = temp3;
+
+                temp2 = p[j-1][2];
+                p[j-1][2] = p[j][2];
+                p[j][2] = temp2;
+
+                temp1 = p[j-1][1];
+                p[j-1][1] = p[j][1];
+                p[j][1] = temp1;
+            }
+        }
+    }
+}
+
+void candidates_table(unsigned int cand[6][3],int** p,int n) {
+    printf("in function\n");
+    int i;
+
+    //μηδενισμός πίνακα
+    for(i = 0; i <= 6; i++){
+        for(int j = 1; j <= 3; j++){
+            cand[i][j] = 0;
+        }
+    }
+
+    for (i = 1; i <= n; i++){
+        printf("i is : %d ,",i);
+        cand[p[i][3]] [p[i][2]]++;
+        printf(" cand is %d\n",cand[p[i][3]] [p[i][2]]);
+        }
+
 }
