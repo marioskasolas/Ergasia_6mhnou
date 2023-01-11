@@ -2,22 +2,26 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define NUM_CANDIDATES 6
+#define NUM_CANDIDATES 7
 
+//Δηλώσεις συναρτήσεων
 int age_converter(char,char);
 int gender_converter(char,char);
 int vote_converter(char,char);
 unsigned short int hex_conv(char c);
-void candidates_table(unsigned int cand[6][3] ,int **,int);
-void bubblesort(int**,int);
+void candidates_table(unsigned int cand[NUM_CANDIDATES][3] ,int **,int);
+void bubble_sort(int**,int);
+void max_search(unsigned int cand[NUM_CANDIDATES][3]);
 
-int main() {
+
+int main(void){
     unsigned int cand[NUM_CANDIDATES][3];
-    int age,gender,vote,i,**p,n = 0;
+    int age_of_voters[NUM_CANDIDATES][4] = {0};
+    int age,gender,vote,i,**p,n = 0,index,max[4];
     char c[5];
-    c[5] = '\0';
+    c[4] = '\0';
 
-    //áíïßãìá áñ÷åßïõ øçöïöüñùí
+    //άνοιγμα αρχείου
     FILE * fp;
     fp = fopen("C:/Users/mario/OneDrive/Desktop/writeup.dat","r");
 
@@ -26,21 +30,21 @@ int main() {
         for(i = 1;i <= 4;i++){
             c[i] = fgetc(fp);
         }
-        //÷ñÞóç óõíÜñôçóçò ç ïðïßá ëáìâÜíåé ùò ïñßóìáôá ôá ðñþôá 2 øçößá ôïõ äåêáåîáäéêïý êáé ôá ìåôáôñÝðåé óå çëéêßá
+        //οι συναρτήσεις age , gender και vote δέχονται ώς ορίσματα τα ψηφία hex της κωδικοποιημένης μορφής των πληροφορίων και τα μετατρέπουν σε ηλικία γένος και ψήφο του ψηφοφόρου
         age = age_converter(c[1],c[2]);
-
-        //÷ñÞóç óõíÜñôçóçò ãéá ìåôáôñïðÞ ôïõ ãÝíïõò áðï ôï 8ü êáé ôï 9ü ìðéô
         gender = gender_converter(c[2],c[3]);
-
-        //÷ñÞóç óõíÜñôçóçò ç ïðïéá ëáìâÜíåé þò üñéóìá ôï ôñßôï êáé ôÝôáñôï øçößï åíïò äåêáåîáäéêïý êáé ôï ìåôáôñÝðåé óôçí øÞöï ôïõ øçöïöüñïõ
         vote = vote_converter(c[3], c[4]);
-        printf("%d vote,%d age,%d gender\n",vote,age,gender);
 
-        if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && (vote >= 0 && vote <= 6)){
+        printf("%d vote,%d age,%d gender\n",vote,age,gender);
+        //ακολουθεί έλεγχος έγκυρης ψήφου
+        if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && ((vote >= 0 && vote <= 6) || vote == -2)){
             printf("This voters vote is valid!\n");
             printf("\n");
 
-            //óõìðëÞñùóç äõíáìéêïý ðßíáêá
+            if(vote == -2){
+                printf("no vote");
+            }
+            //δημιουργεία πίνακα των έγκυρων ψηφοφόρων δυναμικά
             if(n == 0){
                 p = (int**) malloc(1 * sizeof(int*));
                 p[n] = (int *) malloc(3 * sizeof(int));
@@ -53,27 +57,50 @@ int main() {
             }
             if(fp == NULL) printf("NULL");
 
+            //δημιουργεία πίνακα ηλικακών ομάδων ψήφων κάθε ψηφοφόρου
+            if(vote != -2) {
+                if ( age <= 29) {
+                    age_of_voters[vote][0]++;
+                } else if (age <= 44) {
+                    age_of_voters[vote][1]++;
+                } else if (age <= 59) {
+                    age_of_voters[vote][2]++;
+                } else {
+                    age_of_voters[vote][3]++;
+                }
+            }
             p[n][1] = age;
             p[n][2] = gender;
             p[n][3] = vote;
-
-
             n++;
         }
     }while(fgetc(fp) != EOF);
 
     n--;
 
-    bubblesort(p,n);
+    //κλήση συναρτήσεων ταξινόμησης , δημιουργείας πίνακα υποψηφίων και εύρεσης max
+    bubble_sort(p,n);
     candidates_table(cand,p,n);
+    max_search(cand);
 
-/*
-    for(i = 1; i <= n; i++){
-        for(int j = 1; j <= 3; j++){
-            printf("p[%d][%d] = %d\n",i,j,p[i][j]);
+
+    printf("\n");
+    for(int j = 0;j < 4;j++){
+        for(i = 0; i < 7;i++){
+            printf("age_of_voters[canditate : %d][team of age : %d] = % d\n",i,j,age_of_voters[i][j]);
+            if(i == 0){
+                max[j] = age_of_voters[i][j];
+            }
+            else if(age_of_voters[i][j] > max[j]){
+                max[j] = age_of_voters[i][j];
+                index = i;
+            }
         }
     }
-*/
+
+    for(i = 0;i < 4;i++){
+        printf("max[%d] = %d\n",i,max[i]);
+    }
 }
 
 
@@ -178,6 +205,9 @@ int vote_converter(char third_hex, char fourth_hex) {
             }
         }
     }
+    if(consec == 0){//σε περίπτωση που ο ψηφοφόρος δεν ψηφίσει τπτ
+        return -2;
+    }
     return index;
 }
 
@@ -238,7 +268,7 @@ unsigned short int hex_conv(char c) {
     return hex;
 }
 
-void bubblesort(int** p,int n){
+void bubble_sort(int** p,int n){
     int i,j,temp1,temp2,temp3;
     for(i = 2;i <= n; i++){
         for(j = n; j >= i; j--){
@@ -263,17 +293,42 @@ void candidates_table(unsigned int cand[6][3],int** p,int n) {
     printf("in function\n");
     int i,j;
 
-    //ìçäåíéóìüò ðßíáêá
+    //μηδενισμός πίνακα
     for(i = 0; i <= 6; i++){
-        for( j = 1; j <= 3; j++){
+        for( j = 0; j < 3; j++){
             cand[i][j] = 0;
         }
     }
 
-    for (i = 1; i <= n; i++){
-        printf("i is : %d ,",i);
+    for (i = 0; i <= n; i++){
         cand[p[i][3]] [p[i][2]]++;
-        printf(" cand is %d\n",cand[p[i][3]] [p[i][2]]);
     }
 
+    for(i = 0; i<= 6;i++){
+        for( j = 0; j < 3;j++){
+            printf("cand[%d][%d] = %d |",i,j,cand[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void max_search(unsigned int cand[6][3]){
+    printf("\n");
+    for(int j = 0; j <= 6; j++){
+        for(int k = 0 ; k < 3; k++){
+            printf("cand[%d][%d] = %d\n",j,k,cand[j][k]);
+        }
+    }
+    printf("\n");
+    int temp,i,max,max_index;
+    for(i = 0; i <= 6; i++){
+        temp = cand[i][0] + cand[i][1] + cand[i][2];
+        printf("temp = %d at cand[%d]\n",temp,i);
+        if(max < temp){
+            max = temp;
+            max_index = i;
+        }
+    }
+    printf("max is %d\n",max);
+    printf("max index is %d\n",max_index);
 }
