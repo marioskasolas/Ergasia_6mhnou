@@ -5,27 +5,38 @@
 #define NUM_CANDIDATES 7
 
 //Δηλώσεις συναρτήσεων
+int number_of_hex_series(void);
 int age_converter(char,char);
 int gender_converter(char,char);
 int vote_converter(char,char);
 unsigned short int hex_conv(char c);
+
 void candidates_table(unsigned int cand[NUM_CANDIDATES][3] ,int **,int);
 void bubble_sort(int**,int);
 void max_search(unsigned int cand[NUM_CANDIDATES][3]);
 void histograms(unsigned int cand[NUM_CANDIDATES][3]);
 
 
+
 int main(void){
     unsigned int cand[NUM_CANDIDATES][3];
     int age_of_voters[NUM_CANDIDATES][4] = {0};
-    int age,gender,vote,i,**p,n = 0;
+    int age,gender,vote,i,n = 0,pl,**ptr,youth = 0,elder = 0;
     char c[5];
     c[4] = '\0';
 
     //άνοιγμα αρχείου
     FILE * fp;
     fp = fopen("C:/Users/mario/OneDrive/Desktop/writeup.dat","r");
+    if(fp == NULL)
+        exit(10);
+    pl = number_of_hex_series();
 
+    //Δυναμική δέσμευση πίνακα ίση με τους ψηφοφόρους
+    ptr = (int**)malloc(pl * sizeof(int*));
+    for(i = 0;i < pl;i++){
+        ptr[i] = (int*)malloc(3 * sizeof(int));
+    }
 
     do{
         for(i = 1;i <= 4;i++){
@@ -42,48 +53,37 @@ int main(void){
             printf("This voters vote is valid!\n");
             printf("\n");
 
-            if(vote == -2){
-                printf("no vote");
-            }
-            //δημιουργεία πίνακα των έγκυρων ψηφοφόρων δυναμικά
-            if(n == 0){
-                p = (int**) malloc(1 * sizeof(int*));
-                p[n] = (int *) malloc(3 * sizeof(int));
-                //printf("%p",p);
-            }
-            else{
-                p = realloc(p,sizeof(int*));
-                p[n] = (int *) malloc(3 * sizeof(int));
-                //printf("%p",p);
-            }
-            if(fp == NULL) printf("NULL");
-
             //δημιουργεία πίνακα ηλικακών ομάδων ψήφων κάθε ψηφοφόρου
             if(vote != -2) {
                 if ( age <= 29) {
                     age_of_voters[vote][0]++;
+                    youth++;
                 } else if (age <= 44) {
                     age_of_voters[vote][1]++;
                 } else if (age <= 59) {
                     age_of_voters[vote][2]++;
                 } else {
                     age_of_voters[vote][3]++;
+                    elder++;
                 }
             }
-            p[n][1] = age;
-            p[n][2] = gender;
-            p[n][3] = vote;
+            ptr[n][0] = age;
+            ptr[n][1] = gender;
+            ptr[n][2] = vote;
             n++;
         }
     }while(fgetc(fp) != EOF);
 
-    n--;
 
     //κλήση συναρτήσεων ταξινόμησης , δημιουργείας πίνακα υποψηφίων και εύρεσης max
-    bubble_sort(p,n);
-    candidates_table(cand,p,n);
+    bubble_sort(ptr,n);
+    candidates_table(cand,ptr,n);
     max_search(cand);
     histograms(cand);
+
+    for(i = 0;i < pl ;i++)
+        free(ptr[i]);
+    free(ptr);
 }
 
 
@@ -251,28 +251,28 @@ unsigned short int hex_conv(char c) {
     return hex;
 }
 
-void bubble_sort(int** p,int n){
+void bubble_sort(int** ptr,int n){
     int i,j,temp1,temp2,temp3;
-    for(i = 2;i <= n; i++){
+    for(i = 1;i <= n; i++){
         for(j = n; j >= i; j--){
-            if(p[j-1][3] > p[j][3]){
-                temp3 = p[j-1][3];
-                p[j-1][3] = p[j][3];
-                p[j][3] = temp3;
+            if(ptr[j-1][3] > ptr[j][3]){
+                temp3 = ptr[j-1][3];
+                ptr[j-1][3] = ptr[j][3];
+                ptr[j][3] = temp3;
 
-                temp2 = p[j-1][2];
-                p[j-1][2] = p[j][2];
-                p[j][2] = temp2;
+                temp2 = ptr[j-1][2];
+                ptr[j-1][2] = ptr[j][2];
+                ptr[j][2] = temp2;
 
-                temp1 = p[j-1][1];
-                p[j-1][1] = p[j][1];
-                p[j][1] = temp1;
+                temp1 = ptr[j-1][1];
+                ptr[j-1][1] = ptr[j][1];
+                ptr[j][1] = temp1;
             }
         }
     }
 }
 
-void candidates_table(unsigned int cand[6][3],int** p,int n) {
+void candidates_table(unsigned int cand[6][3],int** ptr,int n) {
     printf("in function\n");
     int i,j;
 
@@ -283,8 +283,8 @@ void candidates_table(unsigned int cand[6][3],int** p,int n) {
         }
     }
 
-    for (i = 0; i <= n; i++){
-        cand[p[i][3]] [p[i][2]]++;
+    for (i = 0; i < n; i++){
+        cand[ptr[i][2]] [ptr[i][1]]++;
     }
 
     for(i = 0; i<= 6;i++){
@@ -324,16 +324,16 @@ void max_search(unsigned int cand[NUM_CANDIDATES][3]){
             }
         }
     }
-    printf("O upopsifios me tis perissoteres psifous htan o/η : %d\n",gindex + 1);
+    printf("Candites with most votes in total : %d\n",gindex + 1);
     for(i = 0;i < 3;i++){
         if(i == 0){
-            printf("O upopsifios me tis perissoteres antrikes pshfous htan o/η  : %d\n",index[i] + 1);
+            printf("Candidate with most votes from men : %d\n",index[i] + 1);
         }
         else if(i == 1){
-            printf("O upopsifios me tis perissoteres gunaikeious pshfous htan o/η : %d\n",index[i] + 1);
+            printf("Canditate with most votes from women : %d\n",index[i] + 1);
         }
         else{
-            printf("o upopsifios me tis perissoteres pshfous apo allo htan o/η: %d\n",index[i] + 1);
+            printf("Canditate with most votes from Allo: %d\n",index[i] + 1);
         }
     }
     printf("\n");
@@ -341,39 +341,58 @@ void max_search(unsigned int cand[NUM_CANDIDATES][3]){
 
 void histograms(unsigned int cand[NUM_CANDIDATES][3]){
     int i,j,k;
-    printf("Akolouthei istogramma pshfwn twn upopshfiwn me vash to fullo town psifoforwn : \n");
-    for(i = 0; i < 6; i++) {
-        printf("\n");
-        printf("%d. :\n", i + 1);
-        for (j = 0; j < 3; j++) {
-            if (j == 0) {
-                printf("Andres : ");
-                for(k = 0;k < cand[i][j]; k++) {
+    printf("Histogram based on gender : \n");
+    for(j = 0;j < 3;j++) {
+        if (j == 0) {
+            printf("Men :\n");
+            for (i = 0; i < 6; i++) {
+                printf("%d. ", i);
+                for (k = 0; k < cand[i][j]; k++) {
                     printf("*");
                 }
                 printf("\n");
-            } else if (j == 1) {
-                printf("Gunaikes : ");
-                for(k = 0;k < cand[i][j]; k++){
+            }
+        } else if (j == 1) {
+            printf("Women :\n");
+            for (i = 0; i < 6; i++) {
+                printf("%d. ", i);
+                for (k = 0; k < cand[i][j]; k++) {
                     printf("*");
                 }
                 printf("\n");
-            } else {
-                printf("Allo : ");
-                for(k = 0; k < cand[i][j]; k++){
+            }
+        } else if (j == 2) {
+            printf("Allo :\n");
+            for (i = 0; i < 6; i++) {
+                printf("%d. ", i);
+                for (k = 0; k < cand[i][j]; k++) {
                     printf("*");
                 }
+                printf("\n");
             }
         }
     }
-    printf("\n\n");
-    printf("Akolouthei istogramma vash twn sunolikwn pshfwn kathe psifoforou : ");
-    for(i = 0;i < 6; i++){
-        printf("\n");
-        printf("%d. ",i+1);
-        for(j = 0; j < cand[i][0]+cand[i][1]+cand[i][2];j++){
-            printf("*");
+        printf("\n\n");
+        printf("Histogram based on total votes : ");
+        for (i = 0; i < 6; i++) {
+            printf("\n");
+            printf("%d. ", i + 1);
+            for (j = 0; j < cand[i][0] + cand[i][1] + cand[i][2]; j++) {
+                printf("*");
+            }
         }
     }
 
+
+int number_of_hex_series(void){
+    int sum = 0,i;
+    char c;
+    FILE * fp;
+    fp = fopen("C:/Users/mario/OneDrive/Desktop/writeup.dat","r");
+    for(i = 0;(c = fgetc(fp)) != EOF; i++ ){
+       if(c == '\n') sum++;
+    }
+
+    printf("sum is %d\n",sum + 1);
+    return sum + 1;
 }
