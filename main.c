@@ -12,12 +12,13 @@ unsigned short int hex_conv(char c);
 void candidates_table(unsigned int cand[NUM_CANDIDATES][3] ,int **,int);
 void bubble_sort(int**,int);
 void max_search(unsigned int cand[NUM_CANDIDATES][3]);
+void histograms(unsigned int cand[NUM_CANDIDATES][3]);
 
 
 int main(void){
     unsigned int cand[NUM_CANDIDATES][3];
     int age_of_voters[NUM_CANDIDATES][4] = {0};
-    int age,gender,vote,i,**p,n = 0,index,max[4];
+    int age,gender,vote,i,**p,n = 0;
     char c[5];
     c[4] = '\0';
 
@@ -48,12 +49,12 @@ int main(void){
             if(n == 0){
                 p = (int**) malloc(1 * sizeof(int*));
                 p[n] = (int *) malloc(3 * sizeof(int));
-                printf("%p",p);
+                //printf("%p",p);
             }
             else{
                 p = realloc(p,sizeof(int*));
                 p[n] = (int *) malloc(3 * sizeof(int));
-                printf("%p",p);
+                //printf("%p",p);
             }
             if(fp == NULL) printf("NULL");
 
@@ -82,25 +83,7 @@ int main(void){
     bubble_sort(p,n);
     candidates_table(cand,p,n);
     max_search(cand);
-
-
-    printf("\n");
-    for(int j = 0;j < 4;j++){
-        for(i = 0; i < 7;i++){
-            printf("age_of_voters[canditate : %d][team of age : %d] = % d\n",i,j,age_of_voters[i][j]);
-            if(i == 0){
-                max[j] = age_of_voters[i][j];
-            }
-            else if(age_of_voters[i][j] > max[j]){
-                max[j] = age_of_voters[i][j];
-                index = i;
-            }
-        }
-    }
-
-    for(i = 0;i < 4;i++){
-        printf("max[%d] = %d\n",i,max[i]);
-    }
+    histograms(cand);
 }
 
 
@@ -312,23 +295,85 @@ void candidates_table(unsigned int cand[6][3],int** p,int n) {
     }
 }
 
-void max_search(unsigned int cand[6][3]){
+void max_search(unsigned int cand[NUM_CANDIDATES][3]){
+    unsigned int max,index[3],gmax,gindex;
+    int i,j;
     printf("\n");
-    for(int j = 0; j <= 6; j++){
-        for(int k = 0 ; k < 3; k++){
-            printf("cand[%d][%d] = %d\n",j,k,cand[j][k]);
+    for( j = 0;j < 3;j++){
+        for(i = 0; i < 7;i++){
+            //printf("cand[%d][%d] = %d\n",i,j,cand[i][j]);
+            if(i == 0){
+                max = cand[i][j];
+                index[j] = i;
+            }
+            else if(cand[i][j] > max){
+                max = cand[i][j];
+                index[j] = i;
+            }
+        }
+    }
+    for(i = 0;i < 7;i++){
+        if(i == 0){
+            gmax = cand[i][0] + cand[i][1]+ cand[i][2];
+            gindex = i;
+        }
+        else{
+            if((cand[i][0] + cand[i][1]+ cand[i][2]) > gmax){
+                gmax =  cand[i][0] + cand[i][1]+ cand[i][2];
+                gindex = i;
+            }
+        }
+    }
+    printf("O upopsifios me tis perissoteres psifous htan o/η : %d\n",gindex + 1);
+    for(i = 0;i < 3;i++){
+        if(i == 0){
+            printf("O upopsifios me tis perissoteres antrikes pshfous htan o/η  : %d\n",index[i] + 1);
+        }
+        else if(i == 1){
+            printf("O upopsifios me tis perissoteres gunaikeious pshfous htan o/η : %d\n",index[i] + 1);
+        }
+        else{
+            printf("o upopsifios me tis perissoteres pshfous apo allo htan o/η: %d\n",index[i] + 1);
         }
     }
     printf("\n");
-    int temp,i,max,max_index;
-    for(i = 0; i <= 6; i++){
-        temp = cand[i][0] + cand[i][1] + cand[i][2];
-        printf("temp = %d at cand[%d]\n",temp,i);
-        if(max < temp){
-            max = temp;
-            max_index = i;
+}
+
+void histograms(unsigned int cand[NUM_CANDIDATES][3]){
+    int i,j,k;
+    printf("Akolouthei istogramma pshfwn twn upopshfiwn me vash to fullo town psifoforwn : \n");
+    for(i = 0; i < 6; i++) {
+        printf("\n");
+        printf("%d. :\n", i + 1);
+        for (j = 0; j < 3; j++) {
+            if (j == 0) {
+                printf("Andres : ");
+                for(k = 0;k < cand[i][j]; k++) {
+                    printf("*");
+                }
+                printf("\n");
+            } else if (j == 1) {
+                printf("Gunaikes : ");
+                for(k = 0;k < cand[i][j]; k++){
+                    printf("*");
+                }
+                printf("\n");
+            } else {
+                printf("Allo : ");
+                for(k = 0; k < cand[i][j]; k++){
+                    printf("*");
+                }
+            }
         }
     }
-    printf("max is %d\n",max);
-    printf("max index is %d\n",max_index);
+    printf("\n\n");
+    printf("Akolouthei istogramma vash twn sunolikwn pshfwn kathe psifoforou : ");
+    for(i = 0;i < 6; i++){
+        printf("\n");
+        printf("%d. ",i+1);
+        for(j = 0; j < cand[i][0]+cand[i][1]+cand[i][2];j++){
+            printf("*");
+        }
+    }
+
 }
