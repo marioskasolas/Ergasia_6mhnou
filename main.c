@@ -5,39 +5,44 @@
 #define NUM_CANDIDATES 7
 
 //Äçëþóåéò óõíáñôÞóåùí
-int number_of_hex_series(void);
 int age_converter(char,char);
 int gender_converter(char,char);
 int vote_converter(char,char);
 unsigned short int hex_conv(char c);
 
 void candidates_table(unsigned int cand[NUM_CANDIDATES][3] ,int **,int);
-void bubble_sort(int**,int);
 void max_search(unsigned int cand[NUM_CANDIDATES][3]);
 void histograms(unsigned int cand[NUM_CANDIDATES][3]);
 void age_group_gap(int**,int);
 void print_age_of_voters(int age_of_voters[NUM_CANDIDATES][4]);
+void list_append(int age,int gender,int vote);
+void list_to_table(int**,int);
 
+
+
+struct node{
+    int age;
+    int vote;
+    int gender;
+    struct node *next;
+} *list_head;
+typedef struct node node_s;
+void bubble_sort1(void);
 
 int main(void){
     unsigned int cand[NUM_CANDIDATES][3];
     int age_of_voters[NUM_CANDIDATES][4] = {0};
-    int age,gender,vote,i,n = 0,pl,**ptr,invalid = 0;
+    int age,gender,vote,i,n = 0,**ptr,invalid = 0;
     char c[5];
     c[4] = '\0';
+
+    //áíÜèåóç ôéìÞò null óôï head ôçò ëßóôáò
+    list_head = NULL;
 
     //Üíïéãìá áñ÷åßïõ
     FILE * fp;
     fp = fopen("C:/Users/mario/OneDrive/Desktop/votes.dat","r");
     if(fp == NULL) exit(10);
-    pl = number_of_hex_series();
-
-    //ÄõíáìéêÞ äÝóìåõóç ðßíáêá ßóç ìå ôïõò øçöïöüñïõò
-    ptr = (int**)malloc(pl * sizeof(int*));
-    if(fp == NULL) exit(10);
-    for(i = 0;i < pl;i++){
-        ptr[i] = (int*)malloc(3 * sizeof(int));
-    }
 
     //åîáãùãÞ hex êáé áðïêùäéêïðïßçóç ôçò çëéêßáò ôùí øçöïöüñùí ìå ôçí âïçèåßá ôùí óõíáñôÞóåùí age , gender ,vote êáé Ýëåã÷ïò Ýãêõñùí óôïé÷åßùí øçöïöüñùí
     do{
@@ -50,6 +55,7 @@ int main(void){
 
         //Ýëåã÷ïò Ýãêõñçò øÞöïõ
         if((age >= 18 && age <= 99) && (gender >= 1 && gender <= 3) && ((vote >= 0 && vote <= 6) || vote == -2)){
+
             //äçìéïõñãåßá ðßíáêá çëéêáêþí ïìÜäùí øÞöùí êÜèå øçöïöüñïõ
             if(vote != -2) {
                 if ( age <= 29) {
@@ -62,27 +68,45 @@ int main(void){
                     age_of_voters[vote][3]++;
                 }
             }
-            //åê÷þñçóç óôïí ðßíáêá ôùí øçöïöüñùí ôá äåäïìÝíá ôïõò åöüóïí åßíáé Ýãêõñá
-            ptr[n][0] = age;
-            ptr[n][1] = gender;
-            ptr[n][2] = vote;
-            n++;
+            n++; //Áñéèìüò Ýãêõñùí øÞöùí
+            list_append(age,gender,vote); //ÄõíáìéêÞ êáôá÷þñçóç ðëçñïöñïñéþí óôçí ëßóôá
         }
         else{
             invalid++;//óýíïëï Üêõñùí øÞöùí
         }
     }while(fgetc(fp) != EOF);
 
+    //ÄõíáìéêÞ äÝóìåõóç ðßíáêá
+    ptr = (int**)malloc(n * sizeof(int*));
+    if(fp == NULL) exit(10);
+    for(i = 0;i < n;i++){
+        ptr[i] = (int*)malloc(3 * sizeof(int));
+    }
+
+    bubble_sort1();
+
+    node_s *p;
+    p = list_head;
+    for(i = 0;p != NULL;i++){
+        ptr[i][0] = p ->age;
+        ptr[i][1] = p ->gender;
+        ptr[i][2] = p ->vote;
+        p = p -> next;
+    }
+    for(i = 0;i < n;i++){
+        printf("Age is %d , Gender is %d , Vote is %d\n",ptr[i][0],ptr[i][1],ptr[i][2]);
+    }
+
 
     //êëÞóç óõíáñôÞóåùí ôáîéíüìçóçò , äçìéïõñãåßáò ðßíáêá õðïøçößùí , åýñåóçò max , éóôïãñáììáôþí êáé óõêñßóçò ãéá  max íÝùí êáé max çëéêéùìÝíùí
-    bubble_sort(ptr,n); printf("Invalid votes : %d\n\n",invalid);
+    //list_to_table(ptr,n);
     candidates_table(cand,ptr,n);
     max_search(cand);
     histograms(cand);
     age_group_gap(ptr,n);
 
     //áðåëåõèÝñùóç ìíÞìçò
-    for(i = 0;i < pl ;i++)
+    for(i = 0;i < n ;i++)
         free(ptr[i]);
     free(ptr);
 }
@@ -243,43 +267,6 @@ unsigned short int hex_conv(char c) {
     return hex;
 }
 
-//ÓõíÜñôçóç ðïõ ôáîéíïìåß ìå bubble sort
-void bubble_sort(int** ptr,int n){
-    int i,j,temp1,temp2,temp3;
-    for(i = 1;i < n; i++){
-        for(j = n; j >= i; j--){
-            if(ptr[j-1][2] > ptr[j][2]){
-                temp3 = ptr[j-1][2];
-                ptr[j-1][2] = ptr[j][2];
-                ptr[j][2] = temp3;
-
-                temp2 = ptr[j-1][1];
-                ptr[j-1][1] = ptr[j][1];
-                ptr[j][1] = temp2;
-
-                temp1 = ptr[j-1][0];
-                ptr[j-1][0] = ptr[j][0];
-                ptr[j][0] = temp1;
-            }
-        }
-    }
-    printf("Voters information :\n\n");
-    for(i = 0;i < n;i++){
-        printf("Voter number %d : \n",i);
-        for(j = 0;j < 3;j++){
-            if(j == 0){
-                printf("age : %d\n",ptr[i][j]);
-            }
-            if(j == 1){
-                printf("gender : %d\n",ptr[i][j]);
-            }
-            if(j == 2)
-                printf("vote : %d\n",ptr[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
 
 
 //ÓõíÜñôçóç äçìéïõñãåßáò ðßíáêá õðïøçößùí ìå âÜóç ôçí çëéêßá
@@ -302,7 +289,7 @@ void candidates_table(unsigned int cand[6][3],int** ptr,int n) {
         for( i = 0; i < 7;i++){
             if(j == 0) printf("Candidate number %d got %d votes from men\n",i,cand[i][j]);
             else if(j == 1) printf("Candidate number %d got %d votes from women\n",i,cand[i][j]);
-            else if(j = 2) printf("Candidate number %d got %d votes from allo\n",i,cand[i][j]);
+            else  printf("Candidate number %d got %d votes from allo\n",i,cand[i][j]);
         }
         printf("\n");
     }
@@ -378,7 +365,7 @@ void histograms(unsigned int cand[NUM_CANDIDATES][3]){
         } else if (j == 2) {
             printf("Allo :\n");
             for (i = 0; i < 6; i++) {
-                printf("%d. ", i);
+                printf("%d|", i);
                 for (k = 0; k < cand[i][j]; k++) {
                     printf("*");
                 }
@@ -390,26 +377,12 @@ void histograms(unsigned int cand[NUM_CANDIDATES][3]){
     printf("Histogram based on total votes : ");
     for (i = 0; i < 6; i++) {
         printf("\n");
-        printf("%d. ", i + 1);
+        printf("%d|", i + 1);
         for (j = 0; j < cand[i][0] + cand[i][1] + cand[i][2]; j++) {
             printf("*");
         }
     }
     printf("\n\n");
-}
-
-//ÓõíÜñôçóç ðïõ õðïëïãßæåé êáé åðéóôñÝöåé ðüóåò óåéñÝò áðï hex õðÜñ÷ïõí óôï êþäéêá ìåôñüíôáò ôá '\n' êáé ðñïóèÝôïíôáò 1
-int number_of_hex_series(void){
-    int sum = 0,i;
-    char c;
-    FILE * fp;
-    fp = fopen("C:/Users/mario/OneDrive/Desktop/votes.dat","r");
-    for(i = 0;(c = fgetc(fp)) != EOF; i++ ){
-        if(c == '\n') sum++;
-    }
-
-    //printf("sum is %d\n",sum + 1);
-    return sum + 1;
 }
 
 //ÓõíÜñôçóç ðïõ âñßóêåé ðïéüí øÞöéóåé ðåñéóóüôåñï ç íåïëáßá êáé ðïéïí ïé ðéï ìåãÜëïé
@@ -438,4 +411,61 @@ void age_group_gap(int**ptr,int n){
     }
     printf("Candidate with most votes from young voters : %d\n",maxne);
     printf("Candidate with most votes from elder voters : %d\n",maxol);
+}
+
+void list_append(int age,int gender, int vote){
+    node_s *neos;
+    neos = malloc(sizeof(struct node));
+    neos -> age = age;
+    neos -> vote = vote;
+    neos -> gender = gender;
+    neos -> next = list_head;
+    list_head = neos;
+}
+
+
+/*void list_to_table(int** ptr,int n){
+	int i,j;
+
+	node_s *p;
+	p = list_head;
+		for(i = 0;p != NULL;i++){
+			printf("i is: %d\n",i);
+			ptr[i][0] = p ->age;
+			ptr[i][1] = p ->gender;
+			ptr[i][2] = p ->vote;
+		}
+		for(i = 0;i < n;i++){
+			printf("Age is %d :",ptr[i][0]);
+			}
+}*/
+
+void bubble_sort1(void){
+    int swapped,temp1,temp2,temp3;
+    node_s *ptr1;
+    node_s *lptr = NULL;
+    if(list_head == NULL) exit(10);
+    do {
+        swapped = 0;
+        ptr1 = list_head;
+
+        while (ptr1->next != lptr) {
+            if (ptr1->vote > ptr1->next->vote) {
+                temp1 = ptr1->vote;
+                ptr1->vote = ptr1->next->vote;
+                ptr1->next->vote = temp1;
+
+                temp2 = ptr1->age;
+                ptr1->age = ptr1->next->age;
+                ptr1->next->age = temp2;
+
+                temp3 = ptr1->gender;
+                ptr1->gender = ptr1->next->gender;
+                ptr1->next->gender = temp3;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
 }
